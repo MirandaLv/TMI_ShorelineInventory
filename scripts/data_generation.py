@@ -34,17 +34,18 @@ meta, img_array = crop_boundary(dem_file, shapes)
 # low: between mlw and mhw -0.432, 0.259
 # high: 1.5 tide
 img_array = img_array[0]
+
 mlw = -0.432
 mhw = 0.259
-tide = 1.5 * (mhw - (mlw))
+uppder = mhw + (mhw - mlw)/2
 
-# img_array = np.where((img_array >=-0.432) & (img_array <= 0.259), 2, img_array)
-# img_array = np.where((img_array > 0.259) & (img_array <= tide), 1, img_array)
-# img_array = np.where((img_array == 1) | (img_array == 2), img_array, 0)
-#
-# poquoson_marsh = os.path.join(root_path, 'outputs/poquoson_marsh.tif')
-#
-# with rasterio.open(poquoson_marsh, "w", **meta) as dest:
-#         dest.write(img_array, 1)
+img_array = np.where((img_array >=-mlw) & (img_array <= mhw), 2, img_array)
+img_array = np.where((img_array > mhw) & (img_array <= uppder), 1, img_array)
+img_array = np.where((img_array == 1) | (img_array == 2), img_array, 0)
+
+poquoson_marsh = os.path.join(root_path, 'outputs/poquoson_marsh.tif')
+
+with rasterio.open(poquoson_marsh, "w", **meta) as dest:
+    dest.write(img_array, 1)
 
 
