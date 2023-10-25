@@ -11,7 +11,7 @@ import numpy as np
 from utils import utils
 
 
-study_area = os.path.join(root_path, 'data/PoquosonBound.geojson')
+study_area = os.path.join(root_path, 'data/island_proj.geojson')
 dem_file = "L://CBTBDEM_v2//Chesapeake_Bay_Topobathy_DEM_1m_v2.tif"
 
 # Step 1. Masking the DEM with the county boundary.
@@ -19,7 +19,7 @@ gdf = gpd.read_file(study_area)
 shapes = [gdf.geometry[0]]
 meta, img_array = utils.crop_boundary(dem_file, shapes)
 
-poquoson_dem = os.path.join(root_path, 'outputs/poquoson_dem.tif')
+poquoson_dem = os.path.join(root_path, 'outputs/island_dem.tif')
 
 with rasterio.open(poquoson_dem, "w", **meta) as dest:
     dest.write(img_array)
@@ -32,8 +32,8 @@ with rasterio.open(poquoson_dem, "w", **meta) as dest:
 # high: 1.5 tide
 # resampled_dem = resampled_dem[0]
 
-ml_predict_NAIP = os.path.join(up(up(root_path)), 'projects/TMI_marshes/Poquoson/ML_outputs/poquospn_NAIP.tif')
-poquoson_reclass = os.path.join(root_path, 'outputs/poquoson_dem_reclassed.tif')
+ml_predict_NAIP = os.path.join(up(up(root_path)), 'projects/NewTMI_poquoson/island2_prediction_smooth_sentinel.tif')
+poquoson_reclass = os.path.join(root_path, 'outputs/island_dem_reclassed.tif')
 
 resampled_meta, resampled_dem = utils.upsample(poquoson_dem, ml_predict_NAIP)
 
@@ -50,9 +50,9 @@ with rasterio.open(poquoson_reclass, "w", **resampled_meta) as dest:
 
 
 
-# Step 3. Masking the reclassed DEM marsh types with binary marsh prediction from NAIP
-poquoson_reclass = os.path.join(root_path, 'outputs/poquoson_dem_reclassed.tif')
-poquoson_out = os.path.join(up(up(root_path)), 'projects/TMI_marshes/Poquoson/poquospn_bathy_outputs.tif')
+# Step 4. Masking the reclassed DEM marsh types with binary marsh prediction from NAIP
+poquoson_reclass = os.path.join(root_path, 'outputs/island_dem_reclassed.tif')
+poquoson_out = os.path.join(root_path, 'outputs/island_combined.tif')
 
 ml_predict_array = rasterio.open(ml_predict_NAIP).read(1)
 ml_predict_array = np.where((ml_predict_array==1) | (ml_predict_array==2), 1, 0)
